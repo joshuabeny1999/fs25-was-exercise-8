@@ -31,19 +31,22 @@ robot_td("https://raw.githubusercontent.com/Interactions-HSG/example-tds/main/td
      focusWhenAvailable(OrgArtName)[wid(WkspName)];
      focusWhenAvailable(GroupArtName)[wid(WkspName)];
 	 focusWhenAvailable(SchemeBoardName)[wid(WkspName)];
-	 .wait(1000); // wait for the workspace to be ready
 	.
 
 @adopt_role_after_invited_and_can_adopt
-+available_role(Role, org_name(OrgName)) : i_have_plans_for(R) <-
++available_role(Role, org_name(OrgName))[source(org_agent)]
+:  i_have_plans_for(Role)
+<-
     .print("I will adopt role ‘", Role, "’ – I have plans for it");
     adoptRole(Role).
 
+/* otherwise, drop the belief so that the *next* broadcast can retrigger me */
 @adopt_role_after_invited_and_cannot_adopt
-+available_role(Role, org_name(OrgName)) : true <-
-	.print("I can't adopt role ‘", Role, "’ – I have no plans for it");
-	-available_role(Role, org_name(OrgName)).
-
++available_role(Role, org_name(OrgName))[source(org_agent)]
+:  not i_have_plans_for(Role)
+<-
+    .print("I can't adopt role ‘", Role, "’ – I have no plans for it");
+    -available_role(Role, org_name(OrgName))[source(org_agent)].
 /* 
  * Plan for reacting to the addition of the goal !manifest_temperature
  * Triggering event: addition of goal !manifest_temperature
