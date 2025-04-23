@@ -1,6 +1,12 @@
 // acting agent
-org_role(temperature_manifestor). // the agent has the role temperature_reader
+role_goal(R, G) :-
+    role_mission(R, _, M) & mission_goal(M, G).
 
+can_achieve(G) :-
+    .relevant_plans({+!G[scheme(_)]}, LP) & LP \== [].
+
+i_have_plans_for(R) :-
+    not (role_goal(R, G) & not can_achieve(G)).
 
 // The agent has a belief about the location of the W3C Web of Thing (WoT) Thing Description (TD)
 // that describes a Thing of type https://ci.mines-stetienne.fr/kg/ontology#PhantomX
@@ -25,9 +31,17 @@ robot_td("https://raw.githubusercontent.com/Interactions-HSG/example-tds/main/td
      focusWhenAvailable(OrgArtName)[wid(WkspName)];
      focusWhenAvailable(GroupArtName)[wid(WkspName)];
 	 focusWhenAvailable(SchemeBoardName)[wid(WkspName)];
-     ?org_role(Role);
-     .print("Adopting role ", Role, " in group: ", GroupArtName);
-     adoptRole(Role).
+	 .wait(1000); // wait for the workspace to be ready
+	.
+
+@adopt_role_after_invited_and_can_adopt
++available_role(Role, org_name(OrgName)) : i_have_plans_for(R) <-
+    .print("I will adopt role ‘", Role, "’ – I have plans for it");
+    adoptRole(Role).
+
+@adopt_role_after_invited_and_cannot_adopt
++available_role(Role, org_name(OrgName)) : true <-
+	.print("I can't adopt role ‘", Role, "’ – I have no plans for it").
 
 /* 
  * Plan for reacting to the addition of the goal !manifest_temperature

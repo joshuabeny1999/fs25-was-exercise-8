@@ -42,12 +42,33 @@ sch_name("monitoring_scheme"). // the agent beliefs that it can manage schemes w
     .print("  → broadcast: workspace ‘", OrgName,"’ is now available");
 
     /* 6. Wait for group formation */
-    ?formationStatus(ok)[artifact_id(GroupBoardId)];
+    /* start our polling loop */
+    !poll_group.
 
-    /* 7. Assign the scheme to the group */
-    addScheme(SchemeName)[artifact_id(GroupBoardId), wid(WorkspaceId)];
-    .print("  → assigned scheme ‘", SchemeName,"’ to group ‘", GroupName,"’").
+/* 
+ * Every 15 seconds, as long as the group is not yet well-formed,
+ * find each role R whose current players < min(R)
+ * and invite any agent to adopt it
+*/
+/* 1) If still not well-formed, invite any role R with min=1 and no player yet */
+@poll_group_not_yet_well_formed
++!poll_group : 
+    not formationStatus(ok)[artifact_id(GroupBoardId)] <-
+  ?role_cardinality(R, Min, _) ;
+  ?not play(_, R, GroupBoardId);
+  .print("Role ‘", R, "’ has no player – broadcasting invitation");
+  .broadcast(tell, available_role(R, org_name(OrgName)));
+  .wait(15000);
+  !poll_group.
 
+/* 2) Once well-formed, assign the scheme exactly once */
+@poll_group_well_formed
++!poll_group : formationStatus(ok)[artifact_id(GroupBoardId)] 
+              & sch_name(SchemeName)
+<-
+  .print("Group is now well-formed; assigning scheme '",SchemeName,"'");
+  addScheme(SchemeName)[artifact_id(GroupBoardId)];
+  .print("  → scheme assigned").  
 /* 
  * Plan for reacting to the addition of the test-goal ?formationStatus(ok)
  * Triggering event: addition of goal ?formationStatus(ok)
