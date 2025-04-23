@@ -1,4 +1,6 @@
 // acting agent
+org_role(temperature_manifestor). // the agent has the role temperature_reader
+
 
 // The agent has a belief about the location of the W3C Web of Thing (WoT) Thing Description (TD)
 // that describes a Thing of type https://ci.mines-stetienne.fr/kg/ontology#PhantomX
@@ -16,6 +18,16 @@ robot_td("https://raw.githubusercontent.com/Interactions-HSG/example-tds/main/td
 @start_plan
 +!start : true <-
 	.print("Hello world").
+
++org_workspace_available(WkspName, OrgArtName, GroupArtName, SchemeBoardName)[source(org_agent)] : true
+  <- .print("Joining marketplace: ", WkspName, " " , OrgArtName, " ", GroupArtName);
+     joinWorkspace(WkspName, WkspId);
+     focusWhenAvailable(OrgArtName)[wid(WkspName)];
+     focusWhenAvailable(GroupArtName)[wid(WkspName)];
+	 focusWhenAvailable(SchemeBoardName)[wid(WkspName)];
+     ?org_role(Role);
+     .print("Adopting role ", Role, " in group: ", GroupArtName);
+     adoptRole(Role).
 
 /* 
  * Plan for reacting to the addition of the goal !manifest_temperature

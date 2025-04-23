@@ -1,4 +1,5 @@
 // sensing agent
+org_role(temperature_reader). // the agent has the role temperature_reader
 
 
 /* Initial beliefs and rules */
@@ -15,6 +16,17 @@
 @start_plan
 +!start : true <-
 	.print("Hello world").
+
+
++org_workspace_available(WkspName, OrgArtName, GroupArtName, SchemeBoardName)[source(org_agent)] : true
+  <- .print("Joining marketplace: ", WkspName, " " , OrgArtName, " ", GroupArtName);
+     joinWorkspace(WkspName, WkspId);
+     focusWhenAvailable(OrgArtName)[wid(WkspName)];
+     focusWhenAvailable(GroupArtName)[wid(WkspName)];
+	 focusWhenAvailable(SchemeBoardName)[wid(WkspName)];
+     ?org_role(Role);
+     .print("Adopting role ", Role, " in group: ", GroupArtName);
+     adoptRole(Role).
 
 /* 
  * Plan for reacting to the addition of the goal !read_temperature

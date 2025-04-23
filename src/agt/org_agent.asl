@@ -16,7 +16,37 @@ sch_name("monitoring_scheme"). // the agent beliefs that it can manage schemes w
 */
 @start_plan
 +!start : org_name(OrgName) & group_name(GroupName) & sch_name(SchemeName) <-
-  .print("Hello world").
+    /* 1. Create & join workspace */
+    .print("Initializing org ", OrgName);
+    createWorkspace(lab_monitoring_wksp);
+    joinWorkspace(lab_monitoring_wksp, WorkspaceId);
+    .print("  → workspace created and joined: ", WorkspaceId);
+
+    /* 2. Make & focus OrgBoard */
+    makeArtifact(OrgName, "ora4mas.nopl.OrgBoard", ["src/org/org-spec.xml"], OrgArgId);
+    focus(OrgArgId);
+    .print("  → OrgBoard ready: ", OrgArgId);
+
+    /* 3. Create & focus GroupBoard */
+    createGroup(GroupName, GroupName, GroupBoardId);
+    focus(GroupBoardId);
+    .print("  → GroupBoard ready for ‘", GroupName,"’: ", GroupBoardId);
+
+    /* 4. Create & focus SchemeBoard */
+    createScheme(SchemeName, SchemeName, SchemeBoardId);
+    focus(SchemeBoardId);
+    .print("  → SchemeBoard ready for ‘", SchemeName,"’: ", SchemeBoardId);
+
+    /* 5. Notify other agents */
+    .broadcast(tell, org_workspace_available(lab_monitoring_wksp, OrgName, GroupName, SchemeName));
+    .print("  → broadcast: workspace ‘", OrgName,"’ is now available");
+
+    /* 6. Wait for group formation */
+    ?formationStatus(ok)[artifact_id(GroupBoardId)];
+
+    /* 7. Assign the scheme to the group */
+    addScheme(SchemeName)[artifact_id(GroupBoardId), wid(WorkspaceId)];
+    .print("  → assigned scheme ‘", SchemeName,"’ to group ‘", GroupName,"’").
 
 /* 
  * Plan for reacting to the addition of the test-goal ?formationStatus(ok)
