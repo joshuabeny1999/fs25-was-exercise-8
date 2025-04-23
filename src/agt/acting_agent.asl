@@ -41,7 +41,8 @@ robot_td("https://raw.githubusercontent.com/Interactions-HSG/example-tds/main/td
 
 @adopt_role_after_invited_and_cannot_adopt
 +available_role(Role, org_name(OrgName)) : true <-
-	.print("I can't adopt role ‘", Role, "’ – I have no plans for it").
+	.print("I can't adopt role ‘", Role, "’ – I have no plans for it");
+	-available_role(Role, org_name(OrgName)).
 
 /* 
  * Plan for reacting to the addition of the goal !manifest_temperature
@@ -66,7 +67,7 @@ robot_td("https://raw.githubusercontent.com/Interactions-HSG/example-tds/main/td
 	makeArtifact("leubot1", "org.hyperagents.jacamo.artifacts.wot.ThingArtifact", [Location, true], Leubot1Id); 
 	
 	// sets the API key for controlling the robotic arm as an authenticated user
-	//setAPIKey("77d7a2250abbdb59c6f6324bf1dcddb5")[artifact_id(Leubot1Id)];
+	//setAPIKey("9c1a645ec824562822a28d0cef4e4845")[artifact_id(Leubot1Id)];
 
 	// invokes the action onto:SetWristAngle for manifesting the temperature with the wrist of the robotic arm
 	invokeAction("https://ci.mines-stetienne.fr/kg/ontology#SetWristAngle", ["https://www.w3.org/2019/wot/json-schema#IntegerSchema"], [Degrees])[artifact_id(Leubot1Id)].
